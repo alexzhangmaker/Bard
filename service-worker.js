@@ -1,17 +1,8 @@
-const CACHE_NAME = 'memo-pwa-v3';
+const CACHE_NAME = 'memo-pwa-v5';
 
 const ASSETS = [
+    // Only cache manifest and static assets if absolutely necessary
     './',
-    './index.html',
-    './dist/output.css',
-    './src/main.js',
-    './src/services/StorageService.js',
-    './src/services/FirebaseService.js',
-    './src/services/SyncManager.js',
-    './src/components/MemoList.js',
-    './src/components/MemoCard.js',
-    './src/components/EditorModal.js',
-    './src/components/BottomNav.js',
     './manifest.json'
 ];
 
@@ -36,6 +27,8 @@ self.addEventListener('activate', (e) => {
 });
 
 self.addEventListener('fetch', (e) => {
+    // For code files, go directly to network
+    // Simple strategy: Try cache, if not found (which will be true for code), fetch from network
     e.respondWith(
         caches.match(e.request).then((response) => {
             return response || fetch(e.request);

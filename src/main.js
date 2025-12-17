@@ -24,15 +24,40 @@ const editor = new EditorModal('editor-modal', {
 
 // Logic
 function refreshList() {
-    memos = StorageService.getMemos();
+    memos = StorageService.getMemos().filter(m => !m.isArchived);
     // Sort by createdAt desc for now, or use user preference
     memos.sort((a, b) => b.createdAt - a.createdAt);
     renderMemoList(memos, listContainer);
 
     // Re-attach listeners to cards
     document.querySelectorAll('.memo-card').forEach(card => {
-        card.addEventListener('click', () => {
+        card.addEventListener('click', (e) => {
             const id = card.dataset.id;
+
+            // Handle Archive Button Click
+            if (e.target.closest('.archive-btn')) {
+                e.stopPropagation();
+                if (confirm('Archive this memo?')) {
+                    const memo = memos.find(m => m.id === id);
+                    if (memo) {
+                        memo.isArchived = true;
+                        StorageService.saveMemo(memo);
+                        refreshList();
+                    }
+                }
+                return;
+            }
+
+            // Handle Delete Button Click
+            if (e.target.closest('.delete-btn')) {
+                e.stopPropagation();
+                if (confirm('Delete this memo permanently?')) {
+                    StorageService.deleteMemo(id);
+                    refreshList();
+                }
+                return;
+            }
+
             const memo = memos.find(m => m.id === id);
             if (memo) {
                 editor.show(memo);

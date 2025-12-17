@@ -18,7 +18,8 @@ export class EditorModal {
     }
 
     show(memo = null) {
-        this.modal.classList.remove('translate-y-[120%]');
+        this.modal.classList.remove('h-0');
+        this.modal.classList.add('h-[50vh]');
         if (memo) {
             this.currentMemoId = memo.id;
             this.editor.innerText = memo.content || '';
@@ -30,7 +31,8 @@ export class EditorModal {
     }
 
     hide() {
-        this.modal.classList.add('translate-y-[120%]');
+        this.modal.classList.remove('h-[50vh]');
+        this.modal.classList.add('h-0');
         this.editor.blur();
         this.onClose();
     }

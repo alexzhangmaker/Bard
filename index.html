@@ -5,11 +5,176 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Memo PWA</title>
-    <link href="./dist/output.css?v=2" rel="stylesheet">
     <link rel="manifest" href="./manifest.json">
     <meta name="theme-color" content="#ffffff">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
+    <style>
+        /* 变量与基础设置 */
+        :root {
+            --bg-gray: #f3f4f6;
+            --border-color: #e5e7eb;
+            --text-main: #111827;
+            --text-muted: #6b7280;
+            --primary-blue: #3b82f6;
+            --primary-blue-dark: #1d4ed8;
+            --white: #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-gray);
+            color: var(--text-main);
+            height: 100vh;
+            overflow: hidden;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        /* 布局容器 */
+        #app {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            max-width: 28rem; /* max-w-md */
+            height: 100%;
+            margin: 0 auto;
+            background-color: var(--white);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        /* 主内容区 */
+        #main-view {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+            background-color: #f9fafb; /* bg-gray-50 */
+        }
+
+        #memo-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        /* 编辑器模态框 (原本是动画高度) */
+        #editor-modal {
+            height: 0;
+            overflow: hidden;
+            transition: height 0.3s ease-in-out;
+            background-color: var(--white);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 当编辑器激活时的类名 (需通过JS控制) */
+        #editor-modal.active {
+            height: 60%; /* 或者你希望的展开高度 */
+        }
+
+        .modal-header {
+            height: 2.5rem; /* h-10 */
+            border-bottom: 1px solid #f3f4f6;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 1rem;
+            background-color: #f9fafb;
+        }
+
+        .modal-header .title {
+            font-weight: 600;
+            font-size: 0.875rem;
+            color: #374151;
+        }
+
+        .btn-icon {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #9ca3af;
+        }
+
+        .btn-icon:hover {
+            color: #4b5563;
+        }
+
+        .btn-save {
+            background: none;
+            border: none;
+            color: var(--primary-blue);
+            font-weight: 500;
+            font-size: 0.875rem;
+            cursor: pointer;
+        }
+
+        .btn-save:hover {
+            color: var(--primary-blue-dark);
+        }
+
+        /* 编辑区域 */
+        .editor-container {
+            flex: 1;
+            padding: 1rem;
+            overflow-y: auto;
+        }
+
+        #editor-content {
+            width: 100%;
+            height: 100%;
+            outline: none;
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+
+        #editor-content:empty:before {
+            content: attr(placeholder);
+            color: #9ca3af;
+        }
+
+        /* 工具栏 */
+        #editor-toolbar {
+            height: 2.5rem;
+            border-top: 1px solid #f3f4f6;
+            display: flex;
+            align-items: center;
+            padding: 0 1rem;
+            gap: 1rem;
+            color: var(--text-muted);
+        }
+
+        #editor-toolbar.hidden {
+            display: none;
+        }
+
+        /* 底部导航 */
+        #bottom-nav {
+            height: 4rem; /* h-16 */
+            flex-shrink: 0;
+            background-color: var(--white);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            z-index: 20;
+        }
+
+        /* 图标大小控制 */
+        .icon {
+            width: 1.25rem;
+            height: 1.25rem;
+        }
+    </style>
+
     <script type="importmap">
       {
         "imports": {
@@ -20,46 +185,36 @@
     </script>
 </head>
 
-<body class="bg-gray-100 text-gray-900 h-screen overflow-hidden select-none">
-    <div id="app" class="h-full flex flex-col w-full max-w-md mx-auto bg-white shadow-xl overflow-hidden">
-        <!-- Main Content Area -->
-        <main id="main-view" class="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
-            <!-- Dynamic Content -->
-            <div id="memo-list" class="space-y-4"></div>
+<body>
+    <div id="app">
+        <main id="main-view">
+            <div id="memo-list"></div>
         </main>
 
-        <!-- Editor Container (Flex Item, animates height) -->
-        <div id="editor-modal"
-            class="h-0 overflow-hidden transition-[height] duration-300 ease-in-out bg-white border-t border-gray-200 flex flex-col">
-            <!-- Modal Header -->
-            <div class="h-10 border-b border-gray-50 flex items-center justify-between px-4 bg-gray-50">
-                <button id="close-modal-btn" class="text-gray-400 hover:text-gray-600">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div id="editor-modal">
+            <div class="modal-header">
+                <button id="close-modal-btn" class="btn-icon">
+                    <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
                 </button>
-                <div class="font-semibold text-gray-700 text-sm">Memo</div>
-                <button id="save-memo-btn" class="text-blue-500 font-medium hover:text-blue-700 text-sm">Save</button>
+                <div class="title">Memo</div>
+                <button id="save-memo-btn" class="btn-save">Save</button>
             </div>
-            <!-- Editor Area -->
-            <div class="flex-1 p-4 overflow-y-auto">
-                <div id="editor-content" class="w-full h-full outline-none text-base resize-none" contenteditable="true"
-                    placeholder="Start typing..."></div>
+            
+            <div class="editor-container">
+                <div id="editor-content" contenteditable="true" placeholder="Start typing..."></div>
             </div>
-            <!-- Optional Toolbar -->
-            <div id="editor-toolbar"
-                class="h-10 border-t border-gray-100 flex items-center px-4 space-x-4 text-gray-500 hidden">
-                <button class="hover:text-black">B</button>
-                <button class="hover:text-black">I</button>
-                <button class="hover:text-black">List</button>
+
+            <div id="editor-toolbar" class="hidden">
+                <button style="background:none; border:none; cursor:pointer;">B</button>
+                <button style="background:none; border:none; cursor:pointer;">I</button>
+                <button style="background:none; border:none; cursor:pointer;">List</button>
             </div>
         </div>
 
-        <!-- Bottom Navigation (Flex Item) -->
-        <nav id="bottom-nav"
-            class="h-16 flex-shrink-0 bg-white border-t border-gray-200 flex items-center justify-around z-20">
-            <!-- Populated by JS -->
-        </nav>
+        <nav id="bottom-nav">
+            </nav>
     </div>
 
     <script type="module" src="./src/main.js"></script>
@@ -68,9 +223,6 @@
             navigator.serviceWorker.register('./service-worker.js?v=5')
                 .then((reg) => {
                     console.log('Service Worker Registered', reg);
-                    if (reg.waiting) {
-                        reg.waiting.postMessage({ type: 'SKIP_WAITING' });
-                    }
                 })
                 .catch((err) => console.error('Service Worker Registration Failed:', err));
         }

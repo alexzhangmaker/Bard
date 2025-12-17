@@ -11,19 +11,23 @@ export const StorageService = {
         const memos = this.getMemos();
         const existingIndex = memos.findIndex(m => m.id === memo.id);
 
+        let savedItem;
+
         if (existingIndex >= 0) {
-            memos[existingIndex] = { ...memos[existingIndex], ...memo, updatedAt: Date.now() };
+            savedItem = { ...memos[existingIndex], ...memo, updatedAt: Date.now() };
+            memos[existingIndex] = savedItem;
         } else {
-            memos.unshift({
+            savedItem = {
                 ...memo,
                 id: memo.id || Date.now().toString(),
                 createdAt: Date.now(),
                 updatedAt: Date.now()
-            });
+            };
+            memos.unshift(savedItem);
         }
 
         this.saveMemos(memos);
-        return memo;
+        return savedItem;
     },
 
     saveMemos(memos) {

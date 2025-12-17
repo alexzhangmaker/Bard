@@ -1,6 +1,7 @@
 // Memo Card Component
 export function createMemoCard(memo) {
-    const date = new Date(memo.createdAt).toLocaleDateString();
+    const dateObj = new Date(memo.createdAt);
+    const date = !isNaN(dateObj.getTime()) ? dateObj.toLocaleDateString() : 'Just now';
     const contentPreview = memo.content ? memo.content.substring(0, 100) : 'No content';
 
     const card = document.createElement('div');

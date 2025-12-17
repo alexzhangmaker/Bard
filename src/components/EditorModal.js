@@ -18,11 +18,10 @@ export class EditorModal {
     }
 
     show(memo = null) {
-        this.modal.classList.remove('translate-y-full');
+        this.modal.classList.remove('translate-y-[120%]');
         if (memo) {
             this.currentMemoId = memo.id;
-            this.editor.innerText = memo.content || ''; // Simple text for now
-            // For markdown WYSIWYG, we'd process this.
+            this.editor.innerText = memo.content || '';
         } else {
             this.currentMemoId = null;
             this.editor.innerText = '';
@@ -31,7 +30,7 @@ export class EditorModal {
     }
 
     hide() {
-        this.modal.classList.add('translate-y-full');
+        this.modal.classList.add('translate-y-[120%]');
         this.editor.blur();
         this.onClose();
     }

@@ -61,8 +61,14 @@
     <script type="module" src="./src/main.js"></script>
     <script>
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('./service-worker.js')
-                .then(() => console.log('Service Worker Registered'))
+            navigator.serviceWorker.register('./service-worker.js?v=3')
+                .then((reg) => {
+                    console.log('Service Worker Registered', reg);
+                    // Force update if one is waiting
+                    if (reg.waiting) {
+                        reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+                    }
+                })
                 .catch((err) => console.error('Service Worker Registration Failed:', err));
         }
     </script>

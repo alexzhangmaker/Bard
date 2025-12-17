@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Memo PWA</title>
+    <link href="./dist/output.css" rel="stylesheet">
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#ffffff">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+</head>
+
+<body class="bg-gray-100 text-gray-900 h-screen overflow-hidden select-none">
+    <div id="app" class="h-full flex flex-col relative w-full max-w-md mx-auto bg-white shadow-xl overflow-hidden">
+        <!-- Main Content Area -->
+        <main id="main-view" class="flex-1 overflow-y-auto p-4 space-y-4 pb-24">
+            <!-- Dynamic Content -->
+            <div id="memo-list" class="space-y-4"></div>
+        </main>
+
+        <!-- Bottom Navigation -->
+        <nav id="bottom-nav"
+            class="absolute bottom-0 left-0 right-0 bg-white border-t border-gray-200 h-16 flex items-center justify-around z-20">
+            <!-- Populated by JS -->
+        </nav>
+
+        <!-- Slide-up Modal -->
+        <div id="editor-modal"
+            class="absolute inset-0 z-30 transform transition-transform duration-300 translate-y-full bg-white flex flex-col">
+            <!-- Modal Header -->
+            <div class="h-14 border-b border-gray-100 flex items-center justify-between px-4">
+                <button id="close-modal-btn" class="text-gray-500 hover:text-gray-700">Cancel</button>
+                <div class="font-semibold text-gray-700">New Memo</div>
+                <button id="save-memo-btn" class="text-blue-500 font-medium hover:text-blue-700">Save</button>
+            </div>
+            <!-- Editor Area -->
+            <div class="flex-1 p-4 overflow-y-auto">
+                <div id="editor-content" class="w-full h-full outline-none text-lg resize-none" contenteditable="true"
+                    placeholder="Start typing..."></div>
+            </div>
+            <!-- Optional Toolbar (Can be toggled) -->
+            <div id="editor-toolbar"
+                class="h-10 border-t border-gray-100 flex items-center px-4 space-x-4 text-gray-500 hidden">
+                <button class="hover:text-black">B</button>
+                <button class="hover:text-black">I</button>
+                <button class="hover:text-black">List</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="./src/main.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./service-worker.js')
+                .then(() => console.log('Service Worker Registered'))
+                .catch((err) => console.error('Service Worker Registration Failed:', err));
+        }
+    </script>
+</body>
+
+</html>

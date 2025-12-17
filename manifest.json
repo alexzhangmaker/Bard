@@ -1,0 +1,20 @@
+{
+    "name": "Memo PWA",
+    "short_name": "Memo",
+    "start_url": "./index.html",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#ffffff",
+    "icons": [
+        {
+            "src": "https://via.placeholder.com/192.png?text=Memo",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "https://via.placeholder.com/512.png?text=Memo",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ]
+}
